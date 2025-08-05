@@ -1,0 +1,2046 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分数与小数探险乐园</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#EC4899',
+                        accent: '#10B981',
+                        neutral: '#6B7280',
+                        light: '#F3F4F6',
+                        fraction: '#4338CA',
+                        decimal: '#0EA5E9'
+                    },
+                    fontFamily: {
+                        comic: ['Comic Sans MS', 'cursive', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'game': '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .gradient-bg {
+                background: linear-gradient(135deg, var(--tw-gradient-stops));
+            }
+            .card-flip {
+                perspective: 1000px;
+            }
+            .card-inner {
+                transition: transform 0.6s;
+                transform-style: preserve-3d;
+            }
+            .card-flipped .card-inner {
+                transform: rotateY(180deg);
+            }
+            .card-front, .card-back {
+                backface-visibility: hidden;
+            }
+            .card-back {
+                transform: rotateY(180deg);
+            }
+            .pie-slice {
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+            .pie-slice:hover {
+                filter: brightness(1.1);
+            }
+            .pie-slice.active {
+                filter: brightness(0.9);
+            }
+            .color-picker {
+                transition: transform 0.2s ease;
+            }
+            .color-picker:hover {
+                transform: scale(1.1);
+            }
+            .progress-bar {
+                transition: width 0.5s ease-in-out;
+            }
+            .bounce-in {
+                animation: bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+            @keyframes bounce-in {
+                0% { transform: scale(0.3); opacity: 0; }
+                50% { transform: scale(1.05); }
+                70% { transform: scale(0.9); }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            .pulse {
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            .shine-effect {
+                position: relative;
+                overflow: hidden;
+            }
+            .shine-effect::after {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(
+                    to right,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, 0.3) 50%,
+                    rgba(255, 255, 255, 0) 100%
+                );
+                transform: rotate(30deg);
+                animation: shine 3s infinite;
+            }
+            @keyframes shine {
+                0% { transform: translateX(-100%) rotate(30deg); }
+                100% { transform: translateX(100%) rotate(30deg); }
+            }
+            .custom-fraction {
+                display: inline-flex;
+                flex-direction: column;
+                align-items: center;
+                vertical-align: middle;
+                margin: 0 5px;
+            }
+            .fraction-numerator, .fraction-denominator {
+                padding: 0 5px;
+                font-size: 1.2em;
+            }
+            .fraction-line {
+                width: 100%;
+                border-bottom: 2px solid #374151;
+                margin: 2px 0;
+            }
+            .mjx-chtml {
+                font-size: 1.5em !important;
+            }
+            .connection-line {
+                stroke: #6B7280;
+                stroke-width: 3;
+                stroke-dasharray: 5;
+                animation: dash 1s linear infinite;
+            }
+            @keyframes dash {
+                to {
+                    stroke-dashoffset: 10;
+                }
+            }
+            .connected-line {
+                stroke: #10B981;
+                stroke-width: 3;
+            }
+            .current-player-indicator {
+                animation: pulse 1.5s infinite;
+            }
+            .countdown-animation {
+                animation: countdown 1s infinite alternate;
+            }
+            @keyframes countdown {
+                from { color: #4F46E5; }
+                to { color: #EF4444; }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 min-h-screen font-comic text-gray-800">
+    <header class="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <i class="fa fa-calculator text-primary text-3xl mr-3 pulse"></i>
+                <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-primary text-shadow">分数与小数探险乐园</h1>
+            </div>
+            <div class="flex items-center">
+                <button id="read-header" class="speaker-btn text-neutral hover:text-primary mr-6 transition-colors">
+                    <i class="fa fa-volume-up text-xl"></i>
+                </button>
+                <div class="flex items-center bg-light px-4 py-2 rounded-full">
+                    <span class="text-neutral mr-2">总得分:</span>
+                    <span id="score" class="font-bold text-xl text-accent">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto py-8 px-4">
+        <div id="main-menu" class="py-8">
+            <h2 class="text-[clamp(1.2rem,2vw,1.8rem)] text-center font-bold mb-2 text-gray-700">欢迎来到分数与小数探险乐园！</h2>
+            <p class="text-center text-neutral mb-10 max-w-2xl mx-auto">选择一种游戏模式开始你的数学探险之旅吧！</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                <div class="bg-white rounded-xl p-6 shadow-game card-hover cursor-pointer transition-all" onclick="showLearningGames()">
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-3">
+                            <i class="fa fa-graduation-cap text-primary text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-primary">学习模式</h3>
+                    </div>
+                    <p class="text-neutral text-center">通过互动练习掌握分数与小数的基础知识</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-game card-hover cursor-pointer transition-all" onclick="showMiniGames()">
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 mb-3">
+                            <i class="fa fa-gamepad text-purple-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-purple-600">趣味小游戏</h3>
+                    </div>
+                    <p class="text-neutral text-center">通过翻牌配对等游戏巩固所学知识</p>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center hidden" id="back-to-main-btn">
+                <button onclick="showMainMenu()" class="bg-neutral hover:bg-neutral/90 text-white font-bold py-2 px-6 rounded-full transition duration-300 inline-flex items-center">
+                    <i class="fa fa-arrow-left mr-2"></i> 返回主菜单
+                </button>
+            </div>
+        </div>
+        
+        <div id="learning-games" class="hidden py-8">
+            <h2 class="text-[clamp(1.2rem,2vw,1.8rem)] text-center font-bold mb-8 text-gray-700">选择学习游戏</h2>
+            
+            <div class="text-center mb-6">
+                <button onclick="showMainMenu()" class="bg-neutral/80 hover:bg-neutral text-white font-bold py-2 px-5 rounded-full transition duration-300 inline-flex items-center text-sm">
+                    <i class="fa fa-home mr-2"></i> 返回首页
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+                <div class="bg-white rounded-xl p-6 shadow-game card-hover cursor-pointer transition-all" onclick="startGame('fraction-identify')">
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-3">
+                            <div class="custom-fraction">
+                                <span class="fraction-numerator">1</span>
+                                <span class="fraction-line"></span>
+                                <span class="fraction-denominator">2</span>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-primary">分数识别</h3>
+                    </div>
+                    <p class="text-neutral text-center text-sm">认识真分数，根据图形写出正确分数</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-game card-hover cursor-pointer transition-all" onclick="startGame('decimal-identify')">
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-pink-100 mb-3">
+                            <i class="fa fa-line-chart text-secondary text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-secondary">小数识别</h3>
+                    </div>
+                    <p class="text-neutral text-center text-sm">认识0.1到0.9的小数，根据图形写出正确小数</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-game card-hover cursor-pointer transition-all" onclick="startGame('compare')">
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-3">
+                            <i class="fa fa-balance-scale text-accent text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-accent">比较大小</h3>
+                    </div>
+                    <p class="text-neutral text-center text-sm">比较分母为10的分数与小数的大小关系</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-game card-hover cursor-pointer transition-all" onclick="startGame('coloring')">
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-100 mb-3">
+                            <i class="fa fa-paint-brush text-yellow-500 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-yellow-500">填色练习</h3>
+                    </div>
+                    <p class="text-neutral text-center text-sm">根据给出的分数或小数，为图形的相应部分填色</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="mini-games" class="hidden py-8">
+            <h2 class="text-[clamp(1.2rem,2vw,1.8rem)] text-center font-bold mb-8 text-gray-700">选择趣味小游戏</h2>
+            
+            <div class="text-center mb-6">
+                <button onclick="showMainMenu()" class="bg-neutral/80 hover:bg-neutral text-white font-bold py-2 px-5 rounded-full transition duration-300 inline-flex items-center text-sm">
+                    <i class="fa fa-home mr-2"></i> 返回首页
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                <div class="bg-white rounded-xl p-6 shadow-game card-hover cursor-pointer transition-all" onclick="showMemoryGameOptions()">
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 mb-3">
+                            <i class="fa fa-clone text-purple-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-purple-600">翻牌配对</h3>
+                    </div>
+                    <p class="text-neutral text-center">找出分数与小数的对应对（仅使用分母为10的分数）</p>
+                    
+                    <div id="memory-difficulty" class="mt-4 text-center hidden">
+                        <button class="bg-purple-100 hover:bg-purple-200 text-purple-600 text-sm font-bold py-1 px-4 rounded-full transition duration-300" onclick="startMemoryGame(4); event.stopPropagation();">简单 (4×4)</button>
+                        <button class="bg-purple-100 hover:bg-purple-200 text-purple-600 text-sm font-bold py-1 px-4 rounded-full transition duration-300 ml-2" onclick="startMemoryGame(6); event.stopPropagation();">困难 (6×6)</button>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-game card-hover cursor-pointer transition-all" onclick="showMatchingGameOptions()">
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-3">
+                            <i class="fa fa-link text-green-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-green-600">分数小数连连看</h3>
+                    </div>
+                    <p class="text-neutral text-center">连接相等的分数和小数，锻炼你的匹配能力</p>
+                    
+                    <div id="matching-difficulty" class="mt-4 text-center hidden">
+                        <button class="bg-green-100 hover:bg-green-200 text-green-600 text-sm font-bold py-1 px-4 rounded-full transition duration-300" onclick="startMatchingGame(4); event.stopPropagation();">简单 (4对)</button>
+                        <button class="bg-green-100 hover:bg-green-200 text-green-600 text-sm font-bold py-1 px-4 rounded-full transition duration-300 ml-2" onclick="startMatchingGame(6); event.stopPropagation();">困难 (6对)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="game-container" class="hidden">
+            <div class="bg-white rounded-lg p-4 mb-6 shadow-game flex items-center">
+                <button id="read-instruction" class="speaker-btn text-neutral hover:text-primary mr-3 transition-colors">
+                    <i class="fa fa-volume-up"></i>
+                </button>
+                <h3 id="game-instruction" class="text-lg font-bold text-gray-700"></h3>
+                
+                <div id="countdown-display" class="ml-auto">
+                    <span class="text-lg bg-light px-3 py-1 rounded-full font-bold text-neutral">
+                        剩余时间: <span id="countdown" class="text-primary">15</span>秒
+                    </span>
+                </div>
+            </div>
+            
+            <div class="text-center mb-6">
+                <button onclick="showMainMenu()" class="bg-neutral/80 hover:bg-neutral text-white font-bold py-2 px-5 rounded-full transition duration-300 inline-flex items-center text-sm">
+                    <i class="fa fa-home mr-2"></i> 返回首页
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 mb-8 shadow-game min-h-[250px] flex flex-col items-center justify-center">
+                <div id="question-display" class="mb-6 text-center">
+                </div>
+                
+                <div id="interaction-area" class="w-full max-w-2xl">
+                </div>
+            </div>
+            
+            <div id="options-container" class="flex justify-center gap-4 mb-8 flex-wrap">
+            </div>
+            
+            <div class="flex justify-center space-x-4">
+                <button id="submit-answer" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-full transition duration-300 flex items-center">
+                    <i class="fa fa-check mr-2"></i> 提交答案
+                </button>
+                <button id="next-question" class="hidden bg-accent hover:bg-accent/90 text-white font-bold py-3 px-8 rounded-full transition duration-300 flex items-center">
+                    下一题 <i class="fa fa-arrow-right ml-2"></i>
+                </button>
+                <button id="back-to-menu" class="bg-neutral hover:bg-neutral/90 text-white font-bold py-3 px-8 rounded-full transition duration-300 flex items-center" onclick="showMainMenu()">
+                    <i class="fa fa-arrow-left mr-2"></i> 返回菜单
+                </button>
+            </div>
+        </div>
+        
+        <div id="memory-game-container" class="hidden">
+            <div class="bg-white rounded-lg p-4 mb-6 shadow-game flex items-center justify-between">
+                <div>
+                    <button id="read-memory-instruction" class="speaker-btn text-neutral hover:text-primary mr-3 transition-colors">
+                        <i class="fa fa-volume-up"></i>
+                    </button>
+                    <h3 id="memory-instruction" class="text-lg font-bold text-gray-700 inline-block">翻牌配对：找出分数与小数的对应对（仅分母为10的分数）</h3>
+                </div>
+                <div>
+                    <span class="text-neutral mr-2">已匹配: </span>
+                    <span id="matches-count" class="font-bold text-accent">0</span>
+                    <span class="text-neutral ml-1">/</span>
+                    <span id="total-pairs" class="text-neutral ml-1">0</span>
+                </div>
+            </div>
+            
+            <div class="text-center mb-6">
+                <button onclick="showMainMenu()" class="bg-neutral/80 hover:bg-neutral text-white font-bold py-2 px-5 rounded-full transition duration-300 inline-flex items-center text-sm">
+                    <i class="fa fa-home mr-2"></i> 返回首页
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-game mb-8">
+                <div id="memory-grid" class="grid gap-4 justify-items-center">
+                </div>
+            </div>
+            
+            <div class="flex justify-center">
+                <button id="back-from-memory" class="bg-neutral hover:bg-neutral/90 text-white font-bold py-3 px-8 rounded-full transition duration-300 flex items-center" onclick="showMiniGames()">
+                    <i class="fa fa-arrow-left mr-2"></i> 返回小游戏
+                </button>
+            </div>
+        </div>
+        
+        <div id="matching-game-container" class="hidden">
+            <div class="bg-white rounded-lg p-4 mb-6 shadow-game flex items-center justify-between">
+                <div>
+                    <button id="read-matching-instruction" class="speaker-btn text-neutral hover:text-primary mr-3 transition-colors">
+                        <i class="fa fa-volume-up"></i>
+                    </button>
+                    <h3 id="matching-instruction" class="text-lg font-bold text-gray-700 inline-block">分数小数连连看：连接数值相等的分数和小数</h3>
+                </div>
+                <div>
+                    <span class="text-neutral mr-2">已连接: </span>
+                    <span id="connections-count" class="font-bold text-accent">0</span>
+                    <span class="text-neutral ml-1">/</span>
+                    <span id="total-connections" class="text-neutral ml-1">0</span>
+                </div>
+            </div>
+            
+            <div class="text-center mb-6">
+                <button onclick="showMainMenu()" class="bg-neutral/80 hover:bg-neutral text-white font-bold py-2 px-5 rounded-full transition duration-300 inline-flex items-center text-sm">
+                    <i class="fa fa-home mr-2"></i> 返回首页
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-game mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+                    <div id="fraction-column" class="flex flex-col gap-3">
+                    </div>
+                    <div id="connection-area" class="w-full md:w-1/3 h-[300px] relative">
+                        <svg id="connection-svg" class="w-full h-full" xmlns="http://www.w3.org/2000/svg"></svg>
+                    </div>
+                    <div id="decimal-column" class="flex flex-col gap-3">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center">
+                <button id="back-from-matching" class="bg-neutral hover:bg-neutral/90 text-white font-bold py-3 px-8 rounded-full transition duration-300 flex items-center" onclick="showMiniGames()">
+                    <i class="fa fa-arrow-left mr-2"></i> 返回小游戏
+                </button>
+            </div>
+        </div>
+        
+        <div id="feedback-container" class="hidden bg-white rounded-xl p-8 text-center shadow-game max-w-lg mx-auto bounce-in">
+            <div id="feedback-icon" class="text-6xl mb-4"></div>
+            <h3 id="feedback-message" class="text-2xl font-bold mb-6"></h3>
+            <div class="flex items-center justify-center mb-8">
+                <button id="read-explanation" class="speaker-btn text-neutral hover:text-primary mr-3 transition-colors">
+                    <i class="fa fa-volume-up"></i>
+                </button>
+                <p id="explanation" class="text-neutral">正确答案是 0.5。</p>
+            </div>
+            
+            <div class="text-center mb-6">
+                <button onclick="showMainMenu()" class="bg-neutral/80 hover:bg-neutral text-white font-bold py-2 px-5 rounded-full transition duration-300 inline-flex items-center text-sm">
+                    <i class="fa fa-home mr-2"></i> 返回首页
+                </button>
+            </div>
+            
+            <button id="continue-button" class="bg-accent hover:bg-accent/90 text-white font-bold py-3 px-8 rounded-full transition duration-300">
+                继续 <i class="fa fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+        
+        <div id="game-over-container" class="hidden bg-white rounded-xl p-8 text-center shadow-game max-w-lg mx-auto bounce-in">
+            <h2 class="text-3xl font-bold mb-6 text-primary">游戏结束！</h2>
+            
+            <div id="single-player-results" class="mb-8">
+                <p class="text-xl mb-2">你的最终得分</p>
+                <p id="final-score" class="text-4xl font-bold text-accent mb-4">0</p>
+                <div class="w-full bg-gray-200 rounded-full h-4 mb-6">
+                    <div id="score-bar" class="bg-gradient-to-r from-primary to-accent h-4 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="performance-message" class="text-lg text-neutral"></p>
+            </div>
+            
+            <div class="text-center mb-6">
+                <button onclick="showMainMenu()" class="bg-neutral/80 hover:bg-neutral text-white font-bold py-2 px-5 rounded-full transition duration-300 inline-flex items-center text-sm">
+                    <i class="fa fa-home mr-2"></i> 返回首页
+                </button>
+            </div>
+            
+            <div class="flex justify-center space-x-4">
+                <button id="play-again-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-full transition duration-300">
+                    再玩一次
+                </button>
+                <button id="back-to-main-from-over" class="bg-neutral hover:bg-neutral/90 text-white font-bold py-3 px-8 rounded-full transition duration-300" onclick="showMainMenu()">
+                    返回主菜单
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-6 text-center">
+            <p>分数与小数探险乐园 © 许峵育老师</p>
+            <p class="text-gray-400 text-sm mt-2">让学习数学变得更有趣！</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('submit-answer').addEventListener('click', submitAnswer);
+            document.getElementById('next-question').addEventListener('click', nextQuestion);
+            document.getElementById('continue-button').addEventListener('click', nextQuestion);
+            document.getElementById('play-again-button').addEventListener('click', playAgain);
+            
+            document.getElementById('read-header').addEventListener('click', function() {
+                readText('分数与小数探险乐园');
+            });
+            
+            document.getElementById('read-instruction').addEventListener('click', function() {
+                readText(document.getElementById('game-instruction').textContent);
+            });
+            
+            document.getElementById('read-memory-instruction').addEventListener('click', function() {
+                readText(document.getElementById('memory-instruction').textContent);
+            });
+            
+            document.getElementById('read-matching-instruction').addEventListener('click', function() {
+                readText(document.getElementById('matching-instruction').textContent);
+            });
+            
+            document.getElementById('read-explanation').addEventListener('click', function() {
+                readText(document.getElementById('explanation').textContent);
+            });
+        });
+        
+        function showLearningGames() {
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('learning-games').classList.remove('hidden');
+            document.getElementById('back-to-main-btn').classList.remove('hidden');
+        }
+        
+        function showMiniGames() {
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('mini-games').classList.remove('hidden');
+            document.getElementById('back-to-main-btn').classList.remove('hidden');
+            document.getElementById('memory-difficulty').classList.add('hidden');
+            document.getElementById('matching-difficulty').classList.add('hidden');
+        }
+        
+        function showMemoryGameOptions() {
+            document.getElementById('memory-difficulty').classList.remove('hidden');
+            document.getElementById('matching-difficulty').classList.add('hidden');
+        }
+        
+        function showMatchingGameOptions() {
+            document.getElementById('matching-difficulty').classList.remove('hidden');
+            document.getElementById('memory-difficulty').classList.add('hidden');
+        }
+        
+        let gameState = {
+            mode: '',
+            submode: '',
+            score: 0,
+            currentQuestion: null,
+            selectedAnswer: null,
+            gameCount: 0,
+            maxGames: 10,
+            timer: null,
+            timeRemaining: 15,
+            isAnswered: false,
+            memoryCards: [],
+            flippedCards: [],
+            matchedPairs: 0,
+            totalPairs: 0,
+            isProcessing: false,
+            connections: [],
+            totalConnections: 0,
+            selectedItem: null,
+            pairs: []
+        };
+        
+        const tenthsFractionData = [
+            { numerator: 1, denominator: 10 },
+            { numerator: 2, denominator: 10 },
+            { numerator: 3, denominator: 10 },
+            { numerator: 4, denominator: 10 },
+            { numerator: 5, denominator: 10 },
+            { numerator: 6, denominator: 10 },
+            { numerator: 7, denominator: 10 },
+            { numerator: 8, denominator: 10 },
+            { numerator: 9, denominator: 10 }
+        ];
+        
+        const fractionData = [
+            { numerator: 1, denominator: 2 },
+            { numerator: 1, denominator: 3 },
+            { numerator: 2, denominator: 3 },
+            { numerator: 1, denominator: 4 },
+            { numerator: 2, denominator: 4 },
+            { numerator: 3, denominator: 4 },
+            { numerator: 1, denominator: 5 },
+            { numerator: 2, denominator: 5 },
+            { numerator: 3, denominator: 5 },
+            { numerator: 4, denominator: 5 },
+            ...tenthsFractionData
+        ];
+        
+        const decimalData = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
+        
+        const colorOptions = [
+            { name: "蓝色", code: "#4F46E5" },
+            { name: "粉色", code: "#EC4899" },
+            { name: "绿色", code: "#10B981" },
+            { name: "黄色", code: "#F59E0B" },
+            { name: "紫色", code: "#8B5CF6" },
+            { name: "红色", code: "#EF4444" }
+        ];
+        
+        function createFractionHtml(numerator, denominator) {
+            return `
+                <div class="custom-fraction">
+                    <span class="fraction-numerator">${numerator}</span>
+                    <span class="fraction-line"></span>
+                    <span class="fraction-denominator">${denominator}</span>
+                </div>
+                <span class="hidden latex-fraction">\(\frac{${numerator}}{${denominator}}\)</span>
+            `;
+        }
+        
+        function readText(text, rate = 0.9) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = rate;
+            utterance.pitch = 1.1;
+            utterance.volume = 1;
+            window.speechSynthesis.speak(utterance);
+        }
+        
+        function fractionToChinese(numerator, denominator) {
+            const numbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+            return `${numbers[denominator - 1]}分之${numbers[numerator - 1]}`;
+        }
+        
+        function decimalToChinese(decimal) {
+            const num = Math.round(decimal * 10);
+            const numbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
+            return `零点${numbers[num - 1]}`;
+        }
+        
+        function showMainMenu() {
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+                gameState.timer = null;
+            }
+            
+            document.getElementById('main-menu').classList.remove('hidden');
+            document.getElementById('learning-games').classList.add('hidden');
+            document.getElementById('mini-games').classList.add('hidden');
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('memory-game-container').classList.add('hidden');
+            document.getElementById('matching-game-container').classList.add('hidden');
+            document.getElementById('feedback-container').classList.add('hidden');
+            document.getElementById('game-over-container').classList.add('hidden');
+            document.getElementById('back-to-main-btn').classList.add('hidden');
+            
+            gameState.gameCount = 0;
+        }
+        
+        function startGame(mode) {
+            gameState.mode = mode;
+            document.getElementById('score').textContent = '0';
+            
+            generateQuestion();
+            
+            document.getElementById('learning-games').classList.add('hidden');
+            document.getElementById('mini-games').classList.add('hidden');
+            document.getElementById('game-container').classList.remove('hidden');
+            document.getElementById('feedback-container').classList.add('hidden');
+            document.getElementById('back-to-main-btn').classList.remove('hidden');
+            
+            document.getElementById('submit-answer').classList.remove('hidden');
+            document.getElementById('next-question').classList.add('hidden');
+        }
+        
+        function updateScore() {
+            document.getElementById('score').textContent = gameState.score;
+        }
+        
+        function startCountdown() {
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+            }
+            
+            gameState.timeRemaining = 15;
+            document.getElementById('countdown').textContent = gameState.timeRemaining;
+            
+            const countdownElement = document.getElementById('countdown');
+            countdownElement.classList.remove('countdown-animation');
+            
+            gameState.timer = setInterval(() => {
+                gameState.timeRemaining--;
+                document.getElementById('countdown').textContent = gameState.timeRemaining;
+                
+                if (gameState.timeRemaining <= 5) {
+                    countdownElement.classList.add('countdown-animation');
+                }
+                
+                if (gameState.timeRemaining <= 0) {
+                    clearInterval(gameState.timer);
+                    gameState.timer = null;
+                    
+                    if (!gameState.isAnswered) {
+                        gameState.isAnswered = true;
+                        
+                        const feedbackIcon = document.getElementById('feedback-icon');
+                        const feedbackMessage = document.getElementById('feedback-message');
+                        const explanation = document.getElementById('explanation');
+                        
+                        document.getElementById('submit-answer').classList.add('hidden');
+                        document.getElementById('next-question').classList.remove('hidden');
+                        
+                        feedbackIcon.className = 'fa fa-clock-o text-orange-500';
+                        feedbackMessage.textContent = "时间到！";
+                        feedbackMessage.className = 'text-2xl font-bold text-orange-500';
+                        
+                        if (gameState.currentQuestion.type === 'fraction') {
+                            const { numerator, denominator } = gameState.currentQuestion.value;
+                            explanation.innerHTML = `正确答案是 ${createFractionHtml(numerator, denominator)}。`;
+                        } else if (gameState.currentQuestion.type === 'decimal') {
+                            explanation.textContent = `正确答案是 ${gameState.currentQuestion.correctAnswer}。`;
+                        } else if (gameState.currentQuestion.type === 'compare') {
+                            let val1Html, val2Html;
+                            
+                            if (typeof gameState.currentQuestion.value1 === 'object') {
+                                const { numerator: num1, denominator: den1 } = gameState.currentQuestion.value1;
+                                val1Html = createFractionHtml(num1, den1);
+                            } else {
+                                val1Html = gameState.currentQuestion.value1.toString();
+                            }
+                            
+                            if (typeof gameState.currentQuestion.value2 === 'object') {
+                                const { numerator: num2, denominator: den2 } = gameState.currentQuestion.value2;
+                                val2Html = createFractionHtml(num2, den2);
+                            } else {
+                                val2Html = gameState.currentQuestion.value2.toString();
+                            }
+                            
+                            explanation.innerHTML = `正确的比较是 ${val1Html} ${gameState.currentQuestion.correctAnswer} ${val2Html}。`;
+                        } else if (gameState.currentQuestion.type === 'coloring') {
+                            explanation.textContent = `需要为${gameState.currentQuestion.correctAnswerText}填色。`;
+                        }
+                        
+                        if (window.MathJax) {
+                            MathJax.typeset();
+                        }
+                        
+                        updateScore();
+                        
+                        document.getElementById('game-container').classList.add('hidden');
+                        document.getElementById('feedback-container').classList.remove('hidden');
+                        
+                        gameState.gameCount++;
+                    }
+                }
+            }, 1000);
+        }
+        
+        function generateQuestion() {
+            const instructionEl = document.getElementById('game-instruction');
+            const questionEl = document.getElementById('question-display');
+            const optionsEl = document.getElementById('options-container');
+            const interactionEl = document.getElementById('interaction-area');
+            
+            questionEl.innerHTML = '';
+            optionsEl.innerHTML = '';
+            interactionEl.innerHTML = '';
+            gameState.selectedAnswer = null;
+            gameState.isAnswered = false;
+            
+            switch(gameState.mode) {
+                case 'fraction-identify':
+                    generateFractionIdentifyQuestion(instructionEl, questionEl, optionsEl);
+                    break;
+                case 'decimal-identify':
+                    generateDecimalIdentifyQuestion(instructionEl, questionEl, optionsEl);
+                    break;
+                case 'compare':
+                    generateCompareQuestion(instructionEl, questionEl, optionsEl, interactionEl);
+                    break;
+                case 'coloring':
+                    generateColoringQuestion(instructionEl, questionEl, interactionEl);
+                    break;
+            }
+            
+            if (window.MathJax) {
+                MathJax.typeset();
+            }
+            
+            startCountdown();
+        }
+        
+        function generateFractionIdentifyQuestion(instructionEl, questionEl, optionsEl) {
+            instructionEl.textContent = "请观察图形，选择正确的分数表示阴影部分";
+            
+            const randomIndex = Math.floor(Math.random() * fractionData.length);
+            const fraction = fractionData[randomIndex];
+            gameState.currentQuestion = {
+                type: 'fraction',
+                value: fraction,
+                correctAnswer: `${fraction.numerator}/${fraction.denominator}`,
+                correctAnswerText: fractionToChinese(fraction.numerator, fraction.denominator)
+            };
+            
+            const displayType = Math.random() > 0.5 ? 'pie' : 'rectangle';
+            
+            if (displayType === 'pie') {
+                const pieSize = 240;
+                const svgNS = "http://www.w3.org/2000/svg";
+                const svg = document.createElementNS(svgNS, "svg");
+                svg.setAttribute("width", pieSize);
+                svg.setAttribute("height", pieSize);
+                svg.setAttribute("viewBox", `0 0 ${pieSize} ${pieSize}`);
+                svg.className = "shadow-md rounded-full p-2 bg-white";
+                
+                const center = pieSize / 2;
+                const radius = pieSize / 2 - 10;
+                const sliceAngle = (2 * Math.PI) / fraction.denominator;
+                
+                for (let i = 0; i < fraction.denominator; i++) {
+                    const startAngle = i * sliceAngle;
+                    const endAngle = startAngle + sliceAngle;
+                    
+                    const startX = center + radius * Math.sin(startAngle);
+                    const startY = center - radius * Math.cos(startAngle);
+                    const endX = center + radius * Math.sin(endAngle);
+                    const endY = center - radius * Math.cos(endAngle);
+                    
+                    const largeArcFlag = endAngle - startAngle > Math.PI ? 1 : 0;
+                    
+                    const path = document.createElementNS(svgNS, "path");
+                    const d = [
+                        `M ${center} ${center}`,
+                        `L ${startX} ${startY}`,
+                        `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`,
+                        "Z"
+                    ].join(" ");
+                    
+                    path.setAttribute("d", d);
+                    path.setAttribute("stroke", "#FFFFFF");
+                    path.setAttribute("stroke-width", "2");
+                    
+                    if (i < fraction.numerator) {
+                        path.setAttribute("fill", "#4F46E5");
+                        path.setAttribute("fill-opacity", "0.8");
+                    } else {
+                        path.setAttribute("fill", "#E5E7EB");
+                    }
+                    
+                    svg.appendChild(path);
+                }
+                
+                const totalLabel = document.createElementNS(svgNS, "text");
+                totalLabel.setAttribute("x", center);
+                totalLabel.setAttribute("y", center + 10);
+                totalLabel.setAttribute("text-anchor", "middle");
+                totalLabel.setAttribute("font-size", "24");
+                totalLabel.setAttribute("fill", "#374151");
+                totalLabel.textContent = fraction.denominator;
+                svg.appendChild(totalLabel);
+                
+                questionEl.appendChild(svg);
+            } else {
+                const gridSize = 240;
+                const cols = Math.min(fraction.denominator, 5);
+                const rows = Math.ceil(fraction.denominator / cols);
+                const cellSize = gridSize / cols;
+                
+                const svgNS = "http://www.w3.org/2000/svg";
+                const svg = document.createElementNS(svgNS, "svg");
+                svg.setAttribute("width", gridSize);
+                svg.setAttribute("height", rows * cellSize);
+                svg.setAttribute("viewBox", `0 0 ${gridSize} ${rows * cellSize}`);
+                svg.className = "shadow-md rounded-lg p-2 bg-white";
+                
+                for (let i = 0; i < fraction.denominator; i++) {
+                    const row = Math.floor(i / cols);
+                    const col = i % cols;
+                    
+                    const rect = document.createElementNS(svgNS, "rect");
+                    rect.setAttribute("x", col * cellSize);
+                    rect.setAttribute("y", row * cellSize);
+                    rect.setAttribute("width", cellSize);
+                    rect.setAttribute("height", cellSize);
+                    rect.setAttribute("stroke", "#FFFFFF");
+                    rect.setAttribute("stroke-width", "2");
+                    
+                    if (i < fraction.numerator) {
+                        rect.setAttribute("fill", "#4F46E5");
+                        rect.setAttribute("fill-opacity", "0.8");
+                    } else {
+                        rect.setAttribute("fill", "#E5E7EB");
+                    }
+                    
+                    svg.appendChild(rect);
+                }
+                
+                questionEl.appendChild(svg);
+            }
+            
+            generateFractionOptions(optionsEl, gameState.currentQuestion.correctAnswer);
+        }
+        
+        function generateFractionOptions(container, correctAnswer) {
+            const options = new Set();
+            options.add(correctAnswer);
+            
+            while (options.size < 4) {
+                const randomIndex = Math.floor(Math.random() * fractionData.length);
+                const fraction = fractionData[randomIndex];
+                options.add(`${fraction.numerator}/${fraction.denominator}`);
+            }
+            
+            const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+            
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-btn bg-light hover:bg-blue-100 text-gray-800 font-bold py-4 px-6 rounded-lg transition duration-300 text-center flex flex-col items-center shadow-card';
+                
+                const [num, den] = option.split('/');
+                button.innerHTML = `
+                    ${createFractionHtml(num, den)}
+                    <button class="speaker-btn text-xs text-neutral mt-1">
+                        <i class="fa fa-volume-up"></i>
+                    </button>
+                `;
+                
+                const speakerBtn = button.querySelector('.speaker-btn');
+                speakerBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    readText(fractionToChinese(parseInt(num), parseInt(den)));
+                };
+                
+                button.onclick = () => selectAnswer(button, option);
+                container.appendChild(button);
+            });
+            
+            if (window.MathJax) {
+                MathJax.typeset();
+            }
+        }
+        
+        function generateDecimalIdentifyQuestion(instructionEl, questionEl, optionsEl) {
+            const displayType = Math.random() > 0.5 ? 'bar' : 'number-line';
+            
+            if (displayType === 'bar') {
+                instructionEl.textContent = "请观察彩色条形，选择正确的小数表示彩色部分占整体的多少";
+            } else {
+                instructionEl.textContent = "请观察数轴上的标记点，选择正确的小数";
+            }
+            
+            const randomIndex = Math.floor(Math.random() * decimalData.length);
+            const decimal = decimalData[randomIndex];
+            gameState.currentQuestion = {
+                type: 'decimal',
+                value: decimal,
+                correctAnswer: decimal.toString(),
+                correctAnswerText: decimalToChinese(decimal)
+            };
+            
+            if (displayType === 'bar') {
+                const barWidth = 400;
+                const barHeight = 100;
+                const filledWidth = barWidth * decimal;
+                
+                const svgNS = "http://www.w3.org/2000/svg";
+                const svg = document.createElementNS(svgNS, "svg");
+                svg.setAttribute("width", barWidth);
+                svg.setAttribute("height", barHeight);
+                svg.setAttribute("viewBox", `0 0 ${barWidth} ${barHeight}`);
+                svg.className = "shadow-md rounded-lg p-2 bg-white";
+                
+                const background = document.createElementNS(svgNS, "rect");
+                background.setAttribute("x", 0);
+                background.setAttribute("y", 0);
+                background.setAttribute("width", barWidth);
+                background.setAttribute("height", barHeight);
+                background.setAttribute("fill", "#E5E7EB");
+                background.setAttribute("stroke", "#9CA3AF");
+                background.setAttribute("stroke-width", "2");
+                svg.appendChild(background);
+                
+                for (let i = 1; i < 10; i++) {
+                    const gridX = (barWidth / 10) * i;
+                    
+                    const gridLine = document.createElementNS(svgNS, "line");
+                    gridLine.setAttribute("x1", gridX);
+                    gridLine.setAttribute("y1", 0);
+                    gridLine.setAttribute("x2", gridX);
+                    gridLine.setAttribute("y2", barHeight);
+                    gridLine.setAttribute("stroke", "#FFFFFF");
+                    gridLine.setAttribute("stroke-width", "2");
+                    svg.appendChild(gridLine);
+                    
+                    const tickMark = document.createElementNS(svgNS, "line");
+                    tickMark.setAttribute("x1", gridX);
+                    tickMark.setAttribute("y1", barHeight - 10);
+                    tickMark.setAttribute("x2", gridX);
+                    tickMark.setAttribute("y2", barHeight);
+                    tickMark.setAttribute("stroke", "#6B7280");
+                    tickMark.setAttribute("stroke-width", "3");
+                    svg.appendChild(tickMark);
+                    
+                    if (i % 2 === 0) {
+                        const tickLabel = document.createElementNS(svgNS, "text");
+                        tickLabel.setAttribute("x", gridX);
+                        tickLabel.setAttribute("y", barHeight + 20);
+                        tickLabel.setAttribute("text-anchor", "middle");
+                        tickLabel.setAttribute("font-size", "12");
+                        tickLabel.setAttribute("fill", "#6B7280");
+                        tickLabel.textContent = (i / 10).toString();
+                        svg.appendChild(tickLabel);
+                    }
+                }
+                
+                const defs = document.createElementNS(svgNS, "defs");
+                const gradient = document.createElementNS(svgNS, "linearGradient");
+                gradient.setAttribute("id", "barGradient");
+                gradient.setAttribute("x1", "0%");
+                gradient.setAttribute("y1", "0%");
+                gradient.setAttribute("x2", "100%");
+                gradient.setAttribute("y2", "0%");
+                
+                const stop1 = document.createElementNS(svgNS, "stop");
+                stop1.setAttribute("offset", "0%");
+                stop1.setAttribute("stop-color", "#EC4899");
+                stop1.setAttribute("stop-opacity", "0.9");
+                
+                const stop2 = document.createElementNS(svgNS, "stop");
+                stop2.setAttribute("offset", "100%");
+                stop2.setAttribute("stop-color", "#F472B6");
+                stop2.setAttribute("stop-opacity", "0.9");
+                
+                gradient.appendChild(stop1);
+                gradient.appendChild(stop2);
+                defs.appendChild(gradient);
+                svg.appendChild(defs);
+                
+                const filled = document.createElementNS(svgNS, "rect");
+                filled.setAttribute("x", 0);
+                filled.setAttribute("y", 0);
+                filled.setAttribute("width", filledWidth);
+                filled.setAttribute("height", barHeight);
+                filled.setAttribute("fill", "url(#barGradient)");
+                filled.setAttribute("stroke", "#BE185D");
+                filled.setAttribute("stroke-width", "2");
+                svg.appendChild(filled);
+                
+                const startLabel = document.createElementNS(svgNS, "text");
+                startLabel.setAttribute("x", 0);
+                startLabel.setAttribute("y", barHeight + 20);
+                startLabel.setAttribute("text-anchor", "start");
+                startLabel.setAttribute("font-size", "12");
+                startLabel.setAttribute("fill", "#6B7280");
+                startLabel.textContent = "0";
+                svg.appendChild(startLabel);
+                
+                const endLabel = document.createElementNS(svgNS, "text");
+                endLabel.setAttribute("x", barWidth);
+                endLabel.setAttribute("y", barHeight + 20);
+                endLabel.setAttribute("text-anchor", "end");
+                endLabel.setAttribute("font-size", "12");
+                endLabel.setAttribute("fill", "#6B7280");
+                endLabel.textContent = "1";
+                svg.appendChild(endLabel);
+                
+                questionEl.appendChild(svg);
+            } else {
+                const lineLength = 400;
+                const lineHeight = 80;
+                
+                const svgNS = "http://www.w3.org/2000/svg";
+                const svg = document.createElementNS(svgNS, "svg");
+                svg.setAttribute("width", lineLength);
+                svg.setAttribute("height", lineHeight);
+                svg.setAttribute("viewBox", `0 0 ${lineLength} ${lineHeight}`);
+                svg.className = "shadow-md rounded-lg p-2 bg-white";
+                
+                const axis = document.createElementNS(svgNS, "line");
+                axis.setAttribute("x1", 30);
+                axis.setAttribute("y1", lineHeight / 2);
+                axis.setAttribute("x2", lineLength - 30);
+                axis.setAttribute("y2", lineHeight / 2);
+                axis.setAttribute("stroke", "#374151");
+                axis.setAttribute("stroke-width", "3");
+                svg.appendChild(axis);
+                
+                const startArrow = document.createElementNS(svgNS, "polygon");
+                startArrow.setAttribute("points", "30,20 30,40 25,30");
+                startArrow.setAttribute("fill", "#374151");
+                svg.appendChild(startArrow);
+                
+                const endArrow = document.createElementNS(svgNS, "polygon");
+                endArrow.setAttribute("points", `${lineLength-30},20 ${lineLength-30},40 ${lineLength-25},30`);
+                endArrow.setAttribute("fill", "#374151");
+                svg.appendChild(endArrow);
+                
+                const tick0 = document.createElementNS(svgNS, "line");
+                tick0.setAttribute("x1", 30);
+                tick0.setAttribute("y1", lineHeight / 2 - 8);
+                tick0.setAttribute("x2", 30);
+                tick0.setAttribute("y2", lineHeight / 2 + 8);
+                tick0.setAttribute("stroke", "#374151");
+                tick0.setAttribute("stroke-width", "3");
+                svg.appendChild(tick0);
+                
+                const label0 = document.createElementNS(svgNS, "text");
+                label0.setAttribute("x", 30);
+                label0.setAttribute("y", lineHeight - 5);
+                label0.setAttribute("text-anchor", "middle");
+                label0.setAttribute("font-size", "16");
+                label0.textContent = "0";
+                svg.appendChild(label0);
+                
+                const tick1 = document.createElementNS(svgNS, "line");
+                tick1.setAttribute("x1", lineLength - 30);
+                tick1.setAttribute("y1", lineHeight / 2 - 8);
+                tick1.setAttribute("x2", lineLength - 30);
+                tick1.setAttribute("y2", lineHeight / 2 + 8);
+                tick1.setAttribute("stroke", "#374151");
+                tick1.setAttribute("stroke-width", "3");
+                svg.appendChild(tick1);
+                
+                const label1 = document.createElementNS(svgNS, "text");
+                label1.setAttribute("x", lineLength - 30);
+                label1.setAttribute("y", lineHeight - 5);
+                label1.setAttribute("text-anchor", "middle");
+                label1.setAttribute("font-size", "16");
+                label1.textContent = "1";
+                svg.appendChild(label1);
+                
+                for (let i = 1; i < 10; i++) {
+                    const x = 30 + (lineLength - 60) * (i / 10);
+                    
+                    const tick = document.createElementNS(svgNS, "line");
+                    tick.setAttribute("x1", x);
+                    tick.setAttribute("y1", lineHeight / 2 - 5);
+                    tick.setAttribute("x2", x);
+                    tick.setAttribute("y2", lineHeight / 2 + 5);
+                    tick.setAttribute("stroke", "#374151");
+                    tick.setAttribute("stroke-width", "2");
+                    svg.appendChild(tick);
+                    
+                    if (i % 2 === 0) {
+                        const tickLabel = document.createElementNS(svgNS, "text");
+                        tickLabel.setAttribute("x", x);
+                        tickLabel.setAttribute("y", lineHeight - 5);
+                        tickLabel.setAttribute("text-anchor", "middle");
+                        tickLabel.setAttribute("font-size", "12");
+                        tickLabel.setAttribute("fill", "#6B7280");
+                        tickLabel.textContent = (i / 10).toString();
+                        svg.appendChild(tickLabel);
+                    }
+                }
+                
+                const markerX = 30 + (lineLength - 60) * decimal;
+                const marker = document.createElementNS(svgNS, "circle");
+                marker.setAttribute("cx", markerX);
+                marker.setAttribute("cy", lineHeight / 2);
+                marker.setAttribute("r", 10);
+                marker.setAttribute("fill", "#EC4899");
+                marker.setAttribute("stroke", "#374151");
+                marker.setAttribute("stroke-width", "2");
+                marker.setAttribute("class", "pulse");
+                svg.appendChild(marker);
+                
+                const indicator = document.createElementNS(svgNS, "line");
+                indicator.setAttribute("x1", markerX);
+                indicator.setAttribute("y1", lineHeight / 2 + 10);
+                indicator.setAttribute("x2", markerX);
+                indicator.setAttribute("y2", lineHeight / 2 + 25);
+                indicator.setAttribute("stroke", "#EC4899");
+                indicator.setAttribute("stroke-width", "2");
+                svg.appendChild(indicator);
+                
+                questionEl.appendChild(svg);
+            }
+            
+            generateDecimalOptions(optionsEl, gameState.currentQuestion.correctAnswer);
+        }
+        
+        function generateDecimalOptions(container, correctAnswer) {
+            const options = new Set();
+            options.add(correctAnswer);
+            
+            while (options.size < 4) {
+                const randomIndex = Math.floor(Math.random() * decimalData.length);
+                options.add(decimalData[randomIndex].toString());
+            }
+            
+            const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+            
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-btn bg-light hover:bg-pink-100 text-gray-800 font-bold py-4 px-8 rounded-lg transition duration-300 flex flex-col items-center text-xl shadow-card';
+                button.innerHTML = `
+                    <span>${option}</span>
+                    <button class="speaker-btn text-xs text-neutral mt-1">
+                        <i class="fa fa-volume-up"></i>
+                    </button>
+                `;
+                
+                const speakerBtn = button.querySelector('.speaker-btn');
+                speakerBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    readText(decimalToChinese(parseFloat(option)));
+                };
+                
+                button.onclick = () => selectAnswer(button, option);
+                container.appendChild(button);
+            });
+        }
+        
+        function generateCompareQuestion(instructionEl, questionEl, optionsEl, interactionEl) {
+            instructionEl.textContent = "比较下面两个数的大小，选择正确的关系";
+            
+            const compareType = Math.floor(Math.random() * 3);
+            let value1, value2, value1Text, value2Text, correctAnswer;
+            
+            if (compareType === 0) {
+                const idx1 = Math.floor(Math.random() * tenthsFractionData.length);
+                const idx2 = Math.floor(Math.random() * tenthsFractionData.length);
+                value1 = tenthsFractionData[idx1];
+                value2 = tenthsFractionData[idx2];
+                
+                const dec1 = value1.numerator / value1.denominator;
+                const dec2 = value2.numerator / value2.denominator;
+                
+                value1Text = fractionToChinese(value1.numerator, value1.denominator);
+                value2Text = fractionToChinese(value2.numerator, value2.denominator);
+                
+                if (dec1 > dec2) correctAnswer = "大于";
+                else if (dec1 < dec2) correctAnswer = "小于";
+                else correctAnswer = "等于";
+            } 
+            else if (compareType === 1) {
+                const idx1 = Math.floor(Math.random() * decimalData.length);
+                const idx2 = Math.floor(Math.random() * decimalData.length);
+                value1 = decimalData[idx1];
+                value2 = decimalData[idx2];
+                
+                value1Text = decimalToChinese(value1);
+                value2Text = decimalToChinese(value2);
+                
+                if (value1 > value2) correctAnswer = "大于";
+                else if (value1 < value2) correctAnswer = "小于";
+                else correctAnswer = "等于";
+            } 
+            else {
+                const fracIdx = Math.floor(Math.random() * tenthsFractionData.length);
+                const decIdx = Math.floor(Math.random() * decimalData.length);
+                
+                value1 = tenthsFractionData[fracIdx];
+                value2 = decimalData[decIdx];
+                
+                const dec1 = value1.numerator / value1.denominator;
+                const dec2 = value2;
+                
+                value1Text = fractionToChinese(value1.numerator, value1.denominator);
+                value2Text = decimalToChinese(value2);
+                
+                if (dec1 > dec2) correctAnswer = "大于";
+                else if (dec1 < dec2) correctAnswer = "小于";
+                else correctAnswer = "等于";
+            }
+            
+            gameState.currentQuestion = {
+                type: 'compare',
+                value1: value1,
+                value2: value2,
+                value1Text: value1Text,
+                value2Text: value2Text,
+                correctAnswer: correctAnswer
+            };
+            
+            const comparisonDiv = document.createElement('div');
+            comparisonDiv.className = 'flex items-center justify-center space-x-6 md:space-x-12 text-2xl font-bold';
+            
+            const value1Div = document.createElement('div');
+            value1Div.className = 'flex items-center p-3 bg-light rounded-lg shadow-sm';
+            if (typeof value1 === 'object') {
+                const { numerator: num, denominator: den } = value1;
+                value1Div.innerHTML = `
+                    ${createFractionHtml(num, den)}
+                    <button class="speaker-btn text-sm text-neutral ml-2">
+                        <i class="fa fa-volume-up"></i>
+                    </button>
+                `;
+            } else {
+                value1Div.innerHTML = `
+                    <span>${value1}</span>
+                    <button class="speaker-btn text-sm text-neutral ml-2">
+                        <i class="fa fa-volume-up"></i>
+                    </button>
+                `;
+            }
+            
+            const speakerBtn1 = value1Div.querySelector('.speaker-btn');
+            speakerBtn1.onclick = () => {
+                readText(value1Text);
+            };
+            
+            const symbolDiv = document.createElement('div');
+            symbolDiv.textContent = "?";
+            symbolDiv.className = "text-3xl text-neutral bg-light p-3 rounded-lg shadow-sm";
+            
+            const value2Div = document.createElement('div');
+            value2Div.className = 'flex items-center p-3 bg-light rounded-lg shadow-sm';
+            if (typeof value2 === 'object') {
+                const { numerator: num, denominator: den } = value2;
+                value2Div.innerHTML = `
+                    ${createFractionHtml(num, den)}
+                    <button class="speaker-btn text-sm text-neutral ml-2">
+                        <i class="fa fa-volume-up"></i>
+                    </button>
+                `;
+            } else {
+                value2Div.innerHTML = `
+                    <span>${value2}</span>
+                    <button class="speaker-btn text-sm text-neutral ml-2">
+                        <i class="fa fa-volume-up"></i>
+                    </button>
+                `;
+            }
+            
+            const speakerBtn2 = value2Div.querySelector('.speaker-btn');
+            speakerBtn2.onclick = () => {
+                readText(value2Text);
+            };
+            
+            comparisonDiv.appendChild(value1Div);
+            comparisonDiv.appendChild(symbolDiv);
+            comparisonDiv.appendChild(value2Div);
+            questionEl.appendChild(comparisonDiv);
+            
+            const compareOptions = ["大于", "小于", "等于"];
+            compareOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-btn bg-light hover:bg-green-100 text-gray-800 font-bold py-4 px-8 rounded-lg transition duration-300 text-xl flex flex-col items-center flex-1 md:flex-none min-w-[100px] shadow-card';
+                button.innerHTML = `
+                    <span>${option}</span>
+                    <button class="speaker-btn text-xs text-neutral mt-1">
+                        <i class="fa fa-volume-up"></i>
+                    </button>
+                `;
+                
+                const speakerBtn = button.querySelector('.speaker-btn');
+                speakerBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    readText(option);
+                };
+                
+                button.onclick = () => selectAnswer(button, option);
+                optionsEl.appendChild(button);
+            });
+            
+            if (window.MathJax) {
+                MathJax.typeset();
+            }
+        }
+        
+        function generateColoringQuestion(instructionEl, questionEl, interactionEl) {
+            const isFraction = Math.random() > 0.5;
+            let value, valueText;
+            
+            if (isFraction) {
+                const randomIndex = Math.floor(Math.random() * fractionData.length);
+                value = fractionData[randomIndex];
+                valueText = fractionToChinese(value.numerator, value.denominator);
+                instructionEl.textContent = `请为图形的${valueText}部分填色`;
+            } else {
+                const randomIndex = Math.floor(Math.random() * decimalData.length);
+                value = decimalData[randomIndex];
+                valueText = decimalToChinese(value);
+                instructionEl.textContent = `请为图形的${valueText}部分填色`;
+            }
+            
+            const shapeType = Math.random() > 0.5 ? 'pie' : 'grid';
+            
+            const totalParts = isFraction ? value.denominator : 10;
+            const coloredParts = isFraction ? value.numerator : Math.round(value * 10);
+            
+            gameState.currentQuestion = {
+                type: 'coloring',
+                isFraction: isFraction,
+                value: value,
+                totalParts: totalParts,
+                coloredParts: coloredParts,
+                correctAnswer: coloredParts,
+                correctAnswerText: `${coloredParts}个部分`
+            };
+            
+            const shapeContainer = document.createElement('div');
+            shapeContainer.className = 'mb-6';
+            
+            if (shapeType === 'pie') {
+                const pieSize = 240;
+                const svgNS = "http://www.w3.org/2000/svg";
+                const svg = document.createElementNS(svgNS, "svg");
+                svg.setAttribute("width", pieSize);
+                svg.setAttribute("height", pieSize);
+                svg.setAttribute("viewBox", `0 0 ${pieSize} ${pieSize}`);
+                svg.className = "shadow-md rounded-full p-2 bg-white mx-auto";
+                
+                const center = pieSize / 2;
+                const radius = pieSize / 2 - 10;
+                const sliceAngle = (2 * Math.PI) / totalParts;
+                
+                for (let i = 0; i < totalParts; i++) {
+                    const startAngle = i * sliceAngle;
+                    const endAngle = startAngle + sliceAngle;
+                    
+                    const startX = center + radius * Math.sin(startAngle);
+                    const startY = center - radius * Math.cos(startAngle);
+                    const endX = center + radius * Math.sin(endAngle);
+                    const endY = center - radius * Math.cos(endAngle);
+                    
+                    const largeArcFlag = endAngle - startAngle > Math.PI ? 1 : 0;
+                    
+                    const path = document.createElementNS(svgNS, "path");
+                    const d = [
+                        `M ${center} ${center}`,
+                        `L ${startX} ${startY}`,
+                        `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`,
+                        "Z"
+                    ].join(" ");
+                    
+                    path.setAttribute("d", d);
+                    path.setAttribute("stroke", "#FFFFFF");
+                    path.setAttribute("stroke-width", "2");
+                    path.setAttribute("fill", "#E5E7EB");
+                    path.setAttribute("class", "pie-slice");
+                    path.setAttribute("data-index", i);
+                    
+                    path.addEventListener('click', function() {
+                        this.classList.toggle('active');
+                        if (this.classList.contains('active')) {
+                            this.setAttribute("fill", gameState.selectedColor || "#4F46E5");
+                            this.setAttribute("fill-opacity", "0.8");
+                        } else {
+                            this.setAttribute("fill", "#E5E7EB");
+                        }
+                    });
+                    
+                    svg.appendChild(path);
+                }
+                
+                shapeContainer.appendChild(svg);
+            } else {
+                const gridSize = 240;
+                const cols = Math.min(totalParts, 5);
+                const rows = Math.ceil(totalParts / cols);
+                const cellSize = gridSize / cols;
+                
+                const svgNS = "http://www.w3.org/2000/svg";
+                const svg = document.createElementNS(svgNS, "svg");
+                svg.setAttribute("width", gridSize);
+                svg.setAttribute("height", rows * cellSize);
+                svg.setAttribute("viewBox", `0 0 ${gridSize} ${rows * cellSize}`);
+                svg.className = "shadow-md rounded-lg p-2 bg-white mx-auto";
+                
+                for (let i = 0; i < totalParts; i++) {
+                    const row = Math.floor(i / cols);
+                    const col = i % cols;
+                    
+                    const rect = document.createElementNS(svgNS, "rect");
+                    rect.setAttribute("x", col * cellSize);
+                    rect.setAttribute("y", row * cellSize);
+                    rect.setAttribute("width", cellSize);
+                    rect.setAttribute("height", cellSize);
+                    rect.setAttribute("stroke", "#FFFFFF");
+                    rect.setAttribute("stroke-width", "2");
+                    rect.setAttribute("fill", "#E5E7EB");
+                    rect.setAttribute("class", "pie-slice");
+                    rect.setAttribute("data-index", i);
+                    
+                    rect.addEventListener('click', function() {
+                        this.classList.toggle('active');
+                        if (this.classList.contains('active')) {
+                            this.setAttribute("fill", gameState.selectedColor || "#4F46E5");
+                            this.setAttribute("fill-opacity", "0.8");
+                        } else {
+                            this.setAttribute("fill", "#E5E7EB");
+                        }
+                    });
+                    
+                    svg.appendChild(rect);
+                }
+                
+                shapeContainer.appendChild(svg);
+            }
+            
+            questionEl.appendChild(shapeContainer);
+            
+            const colorPickerDiv = document.createElement('div');
+            colorPickerDiv.className = 'flex justify-center gap-3 mb-6';
+            colorPickerDiv.innerHTML = '<p class="text-center mr-2 self-center">选择颜色：</p>';
+            
+            colorOptions.forEach(color => {
+                const colorBtn = document.createElement('button');
+                colorBtn.className = 'color-picker w-8 h-8 rounded-full shadow-sm border-2 border-transparent';
+                colorBtn.style.backgroundColor = color.code;
+                colorBtn.title = color.name;
+                
+                colorBtn.addEventListener('click', function() {
+                    document.querySelectorAll('.color-picker').forEach(btn => {
+                        btn.classList.remove('ring-2', 'ring-gray-500');
+                        btn.classList.add('border-transparent');
+                    });
+                    
+                    this.classList.add('ring-2', 'ring-gray-500');
+                    this.classList.remove('border-transparent');
+                    
+                    gameState.selectedColor = color.code;
+                    
+                    document.querySelectorAll('.pie-slice.active').forEach(slice => {
+                        slice.setAttribute("fill", color.code);
+                    });
+                });
+                
+                colorPickerDiv.appendChild(colorBtn);
+            });
+            
+            setTimeout(() => {
+                const firstColor = document.querySelector('.color-picker');
+                if (firstColor) {
+                    firstColor.click();
+                }
+            }, 100);
+            
+            interactionEl.appendChild(colorPickerDiv);
+            
+            const hintText = document.createElement('p');
+            hintText.className = 'text-center text-neutral mb-4';
+            hintText.textContent = `提示：需要为${isFraction ? valueText : valueText}的部分填色`;
+            interactionEl.appendChild(hintText);
+        }
+        
+        function startMemoryGame(size) {
+            gameState.submode = `memory-${size}`;
+            gameState.memoryCards = [];
+            gameState.flippedCards = [];
+            gameState.matchedPairs = 0;
+            gameState.totalPairs = (size * size) / 2;
+            gameState.isProcessing = false;
+            
+            document.getElementById('matches-count').textContent = '0';
+            document.getElementById('total-pairs').textContent = gameState.totalPairs;
+            
+            const grid = document.getElementById('memory-grid');
+            grid.className = `grid grid-cols-${size} gap-4 justify-items-center`;
+            grid.innerHTML = '';
+            
+            const pairs = [];
+            const maxPairsNeeded = gameState.totalPairs;
+            const availablePairs = tenthsFractionData.length;
+            
+            for (let i = 0; i < maxPairsNeeded; i++) {
+                const fraction = tenthsFractionData[i % availablePairs];
+                const decimal = fraction.numerator / fraction.denominator;
+                
+                pairs.push({
+                    fraction: fraction,
+                    decimal: decimal
+                });
+            }
+            
+            pairs.forEach(pair => {
+                gameState.memoryCards.push({
+                    id: `frac-${pair.fraction.numerator}-${pair.fraction.denominator}`,
+                    type: 'fraction',
+                    value: pair.fraction,
+                    display: createFractionHtml(pair.fraction.numerator, pair.fraction.denominator),
+                    matchId: `dec-${pair.decimal}`
+                });
+                
+                gameState.memoryCards.push({
+                    id: `dec-${pair.decimal}`,
+                    type: 'decimal',
+                    value: pair.decimal,
+                    display: pair.decimal.toString(),
+                    matchId: `frac-${pair.fraction.numerator}-${pair.fraction.denominator}`
+                });
+            });
+            
+            gameState.memoryCards.sort(() => Math.random() - 0.5);
+            
+            gameState.memoryCards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card-flip w-20 h-28 md:w-24 md:h-32 cursor-pointer';
+                
+                const backColorClass = card.type === 'fraction' ? 'bg-fraction' : 'bg-decimal';
+                
+                cardElement.innerHTML = `
+                    <div class="card-inner relative w-full h-full">
+                        <div class="card-front absolute w-full h-full ${backColorClass} rounded-xl flex items-center justify-center shadow-card text-white text-xl font-bold">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                        <div class="card-back absolute w-full h-full bg-white rounded-xl flex items-center justify-center shadow-card p-2">
+                            <div class="text-center text-gray-800">
+                                ${card.display}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                cardElement.addEventListener('click', function() {
+                    flipCard(index, this);
+                });
+                
+                grid.appendChild(cardElement);
+            });
+            
+            document.getElementById('memory-instruction').textContent = `翻牌配对：找出分数与小数的对应对（仅分母为10的分数）（${size}×${size}）`;
+            
+            document.getElementById('mini-games').classList.add('hidden');
+            document.getElementById('memory-game-container').classList.remove('hidden');
+            
+            if (window.MathJax) {
+                MathJax.typeset();
+            }
+        }
+        
+        function flipCard(index, element) {
+            if (gameState.isProcessing || 
+                gameState.flippedCards.includes(index) || 
+                element.classList.contains('card-flipped')) {
+                return;
+            }
+            
+            element.classList.add('card-flipped');
+            gameState.flippedCards.push(index);
+            
+            if (gameState.flippedCards.length === 2) {
+                gameState.isProcessing = true;
+                
+                const card1Index = gameState.flippedCards[0];
+                const card2Index = gameState.flippedCards[1];
+                const card1 = gameState.memoryCards[card1Index];
+                const card2 = gameState.memoryCards[card2Index];
+                
+                if (card1.matchId === card2.id) {
+                    gameState.matchedPairs++;
+                    document.getElementById('matches-count').textContent = gameState.matchedPairs;
+                    
+                    gameState.score += 10;
+                    document.getElementById('score').textContent = gameState.score;
+                    
+                    gameState.flippedCards = [];
+                    gameState.isProcessing = false;
+                    
+                    if (gameState.matchedPairs === gameState.totalPairs) {
+                        setTimeout(() => {
+                            document.getElementById('memory-game-container').classList.add('hidden');
+                            document.getElementById('game-over-container').classList.remove('hidden');
+                            
+                            document.getElementById('single-player-results').classList.remove('hidden');
+                            
+                            const score = gameState.score;
+                            document.getElementById('final-score').textContent = score;
+                            
+                            const scorePercentage = 100;
+                            document.getElementById('score-bar').style.width = `${scorePercentage}%`;
+                            
+                            document.getElementById('performance-message').textContent = "太棒了！你成功匹配了所有卡片，对分数和小数的对应关系掌握得很好！";
+                        }, 1000);
+                    }
+                } else {
+                    setTimeout(() => {
+                        const cards = document.querySelectorAll('.card-flip');
+                        cards[card1Index].classList.remove('card-flipped');
+                        cards[card2Index].classList.remove('card-flipped');
+                        
+                        gameState.flippedCards = [];
+                        gameState.isProcessing = false;
+                    }, 1500);
+                }
+            }
+        }
+        
+        function startMatchingGame(pairCount) {
+            gameState.submode = `matching-${pairCount}`;
+            gameState.connections = [];
+            gameState.totalConnections = pairCount;
+            gameState.selectedItem = null;
+            gameState.pairs = [];
+            
+            document.getElementById('connection-svg').innerHTML = '';
+            
+            document.getElementById('connections-count').textContent = '0';
+            document.getElementById('total-connections').textContent = gameState.totalConnections;
+            
+            document.getElementById('fraction-column').innerHTML = '';
+            document.getElementById('decimal-column').innerHTML = '';
+            
+            const availablePairs = tenthsFractionData.length;
+            
+            for (let i = 0; i < pairCount; i++) {
+                const fraction = tenthsFractionData[i % availablePairs];
+                const decimal = fraction.numerator / fraction.denominator;
+                
+                gameState.pairs.push({
+                    id: i,
+                    fraction: fraction,
+                    decimal: decimal,
+                    connected: false
+                });
+            }
+            
+            const shuffledDecimals = [...gameState.pairs.map(p => p.decimal)].sort(() => Math.random() - 0.5);
+            
+            gameState.pairs.forEach((pair, index) => {
+                const fractionCard = document.createElement('div');
+                fractionCard.className = 'fraction-item bg-fraction/10 hover:bg-fraction/20 p-3 rounded-lg shadow-card cursor-pointer transition-all flex items-center';
+                fractionCard.setAttribute('data-id', pair.id);
+                fractionCard.setAttribute('data-type', 'fraction');
+                
+                const { numerator: num, denominator: den } = pair.fraction;
+                fractionCard.innerHTML = `
+                    ${createFractionHtml(num, den)}
+                    <button class="speaker-btn text-xs text-neutral ml-2">
+                        <i class="fa fa-volume-up"></i>
+                    </button>
+                `;
+                
+                const speakerBtn = fractionCard.querySelector('.speaker-btn');
+                speakerBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    readText(fractionToChinese(num, den));
+                };
+                
+                fractionCard.addEventListener('click', function() {
+                    selectMatchingItem(this);
+                });
+                
+                document.getElementById('fraction-column').appendChild(fractionCard);
+            });
+            
+            shuffledDecimals.forEach((decimal, index) => {
+                const pair = gameState.pairs.find(p => p.decimal === decimal);
+                const decimalCard = document.createElement('div');
+                decimalCard.className = 'decimal-item bg-decimal/10 hover:bg-decimal/20 p-3 rounded-lg shadow-card cursor-pointer transition-all flex items-center';
+                decimalCard.setAttribute('data-id', pair.id);
+                decimalCard.setAttribute('data-type', 'decimal');
+                decimalCard.innerHTML = `
+                    <span class="text-lg">${decimal}</span>
+                    <button class="speaker-btn text-xs text-neutral ml-2">
+                        <i class="fa fa-volume-up"></i>
+                    </button>
+                `;
+                
+                const speakerBtn = decimalCard.querySelector('.speaker-btn');
+                speakerBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    readText(decimalToChinese(decimal));
+                };
+                
+                decimalCard.addEventListener('click', function() {
+                    selectMatchingItem(this);
+                });
+                
+                document.getElementById('decimal-column').appendChild(decimalCard);
+            });
+            
+            document.getElementById('mini-games').classList.add('hidden');
+            document.getElementById('matching-game-container').classList.remove('hidden');
+            
+            if (window.MathJax) {
+                MathJax.typeset();
+            }
+        }
+        
+        function selectMatchingItem(element) {
+            if (element.classList.contains('connected')) {
+                return;
+            }
+            
+            document.querySelectorAll('.fraction-item, .decimal-item').forEach(item => {
+                item.classList.remove('ring-2', 'ring-primary');
+            });
+            
+            element.classList.add('ring-2', 'ring-primary');
+            
+            const currentId = parseInt(element.getAttribute('data-id'));
+            const currentType = element.getAttribute('data-type');
+            
+            if (gameState.selectedItem === null) {
+                gameState.selectedItem = {
+                    element: element,
+                    id: currentId,
+                    type: currentType
+                };
+                return;
+            }
+            
+            const firstItem = gameState.selectedItem;
+            
+            if (firstItem.type === currentType) {
+                gameState.selectedItem = {
+                    element: element,
+                    id: currentId,
+                    type: currentType
+                };
+                return;
+            }
+            
+            if (firstItem.id === currentId) {
+                connectItems(firstItem.element, element, firstItem.id);
+                
+                firstItem.element.classList.add('connected', 'opacity-70');
+                element.classList.add('connected', 'opacity-70');
+                firstItem.element.classList.remove('ring-2', 'ring-primary');
+                element.classList.remove('ring-2', 'ring-primary');
+                
+                gameState.connections.push(firstItem.id);
+                document.getElementById('connections-count').textContent = gameState.connections.length;
+                
+                gameState.score += 10;
+                document.getElementById('score').textContent = gameState.score;
+                
+                if (gameState.connections.length === gameState.totalConnections) {
+                    setTimeout(() => {
+                        document.getElementById('matching-game-container').classList.add('hidden');
+                        document.getElementById('game-over-container').classList.remove('hidden');
+                        
+                        document.getElementById('single-player-results').classList.remove('hidden');
+                        
+                        const score = gameState.score;
+                        document.getElementById('final-score').textContent = score;
+                        
+                        const scorePercentage = 100;
+                        document.getElementById('score-bar').style.width = `${scorePercentage}%`;
+                        
+                        document.getElementById('performance-message').textContent = "太棒了！你成功连接了所有匹配项，对分数和小数的转换掌握得很好！";
+                    }, 1000);
+                }
+            } else {
+                drawTemporaryConnection(firstItem.element, element);
+                
+                firstItem.element.classList.add('ring-2', 'ring-red-500');
+                element.classList.add('ring-2', 'ring-red-500');
+                
+                setTimeout(() => {
+                    firstItem.element.classList.remove('ring-2', 'ring-red-500');
+                    element.classList.remove('ring-2', 'ring-red-500');
+                }, 1000);
+            }
+            
+            gameState.selectedItem = null;
+        }
+        
+        function drawTemporaryConnection(fromElement, toElement) {
+            const svg = document.getElementById('connection-svg');
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            
+            const fromRect = fromElement.getBoundingClientRect();
+            const toRect = toElement.getBoundingClientRect();
+            const svgRect = svg.getBoundingClientRect();
+            
+            const x1 = fromRect.right - svgRect.left;
+            const y1 = fromRect.top + fromRect.height/2 - svgRect.top;
+            const x2 = toRect.left - svgRect.left;
+            const y2 = toRect.top + toRect.height/2 - svgRect.top;
+            
+            line.setAttribute("x1", x1);
+            line.setAttribute("y1", y1);
+            line.setAttribute("x2", x2);
+            line.setAttribute("y2", y2);
+            line.setAttribute("class", "connection-line");
+            line.setAttribute("id", "temporary-line");
+            
+            svg.appendChild(line);
+            
+            setTimeout(() => {
+                const tempLine = document.getElementById('temporary-line');
+                if (tempLine) {
+                    svg.removeChild(tempLine);
+                }
+            }, 1000);
+        }
+        
+        function connectItems(fromElement, toElement, pairId) {
+            const svg = document.getElementById('connection-svg');
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            
+            const fromRect = fromElement.getBoundingClientRect();
+            const toRect = toElement.getBoundingClientRect();
+            const svgRect = svg.getBoundingClientRect();
+            
+            const x1 = fromRect.right - svgRect.left;
+            const y1 = fromRect.top + fromRect.height/2 - svgRect.top;
+            const x2 = toRect.left - svgRect.left;
+            const y2 = toRect.top + toRect.height/2 - svgRect.top;
+            
+            line.setAttribute("x1", x1);
+            line.setAttribute("y1", y1);
+            line.setAttribute("x2", x2);
+            line.setAttribute("y2", y2);
+            line.setAttribute("class", "connected-line");
+            line.setAttribute("id", `connection-${pairId}`);
+            
+            svg.appendChild(line);
+        }
+        
+        function selectAnswer(button, value) {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('bg-light');
+            });
+            
+            button.classList.remove('bg-light', 'hover:bg-blue-100', 'hover:bg-pink-100', 'hover:bg-green-100');
+            button.classList.add('bg-primary', 'text-white');
+            
+            gameState.selectedAnswer = value;
+        }
+        
+        function submitAnswer() {
+            if (gameState.selectedAnswer === null && gameState.currentQuestion.type !== 'coloring') {
+                readText('请选择一个答案');
+                return;
+            }
+            
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+                gameState.timer = null;
+            }
+            
+            gameState.isAnswered = true;
+            
+            let isCorrect = false;
+            if (gameState.currentQuestion.type === 'coloring') {
+                const coloredCount = document.querySelectorAll('.pie-slice.active').length;
+                isCorrect = coloredCount === gameState.currentQuestion.correctAnswer;
+            } else {
+                isCorrect = gameState.selectedAnswer === gameState.currentQuestion.correctAnswer;
+            }
+            
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackMessage = document.getElementById('feedback-message');
+            const explanation = document.getElementById('explanation');
+            
+            if (isCorrect) {
+                feedbackIcon.className = 'fa fa-check-circle text-accent';
+                feedbackMessage.textContent = "太棒了，正确！";
+                feedbackMessage.className = 'text-2xl font-bold text-accent';
+                gameState.score += 10;
+            } else {
+                feedbackIcon.className = 'fa fa-times-circle text-red-500';
+                feedbackMessage.textContent = "答错了，再接再厉！";
+                feedbackMessage.className = 'text-2xl font-bold text-red-500';
+            }
+            
+            if (gameState.currentQuestion.type === 'fraction') {
+                const { numerator, denominator } = gameState.currentQuestion.value;
+                explanation.innerHTML = `正确答案是 ${createFractionHtml(numerator, denominator)}。`;
+            } else if (gameState.currentQuestion.type === 'decimal') {
+                explanation.textContent = `正确答案是 ${gameState.currentQuestion.correctAnswer}。`;
+            } else if (gameState.currentQuestion.type === 'compare') {
+                let val1Html, val2Html;
+                
+                if (typeof gameState.currentQuestion.value1 === 'object') {
+                    const { numerator: num1, denominator: den1 } = gameState.currentQuestion.value1;
+                    val1Html = createFractionHtml(num1, den1);
+                } else {
+                    val1Html = gameState.currentQuestion.value1.toString();
+                }
+                
+                if (typeof gameState.currentQuestion.value2 === 'object') {
+                    const { numerator: num2, denominator: den2 } = gameState.currentQuestion.value2;
+                    val2Html = createFractionHtml(num2, den2);
+                } else {
+                    val2Html = gameState.currentQuestion.value2.toString();
+                }
+                
+                explanation.innerHTML = `正确的比较是 ${val1Html} ${gameState.currentQuestion.correctAnswer} ${val2Html}。`;
+            } else if (gameState.currentQuestion.type === 'coloring') {
+                explanation.textContent = `需要为${gameState.currentQuestion.correctAnswerText}填色。`;
+            }
+            
+            if (window.MathJax) {
+                MathJax.typeset();
+            }
+            
+            updateScore();
+            
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('feedback-container').classList.remove('hidden');
+            
+            gameState.gameCount++;
+        }
+        
+        function nextQuestion() {
+            if (gameState.gameCount >= gameState.maxGames) {
+                document.getElementById('feedback-container').classList.add('hidden');
+                document.getElementById('game-over-container').classList.remove('hidden');
+                
+                document.getElementById('single-player-results').classList.remove('hidden');
+                
+                document.getElementById('final-score').textContent = gameState.score;
+                
+                const scorePercentage = (gameState.score / (gameState.maxGames * 10)) * 100;
+                document.getElementById('score-bar').style.width = `${scorePercentage}%`;
+                
+                let message = "";
+                if (scorePercentage === 100) {
+                    message = "太完美了！你对分数和小数的知识掌握得非常出色！";
+                } else if (scorePercentage >= 80) {
+                    message = "做得很好！你对分数和小数有很好的理解。";
+                } else if (scorePercentage >= 60) {
+                    message = "不错！继续练习可以让你更加熟练掌握这些知识。";
+                } else {
+                    message = "继续努力！多练习几次，你会有更大的进步。";
+                }
+                document.getElementById('performance-message').textContent = message;
+            } else {
+                document.getElementById('feedback-container').classList.add('hidden');
+                document.getElementById('game-container').classList.remove('hidden');
+                
+                document.getElementById('submit-answer').classList.remove('hidden');
+                document.getElementById('next-question').classList.add('hidden');
+                
+                generateQuestion();
+            }
+        }
+        
+        function playAgain() {
+            if (gameState.submode && gameState.submode.startsWith('memory-')) {
+                const size = parseInt(gameState.submode.split('-')[1]);
+                startMemoryGame(size);
+            } else if (gameState.submode && gameState.submode.startsWith('matching-')) {
+                const pairCount = parseInt(gameState.submode.split('-')[1]);
+                startMatchingGame(pairCount);
+            } else {
+                gameState.score = 0;
+                document.getElementById('score').textContent = '0';
+                gameState.gameCount = 0;
+                
+                document.getElementById('game-over-container').classList.add('hidden');
+                document.getElementById('game-container').classList.remove('hidden');
+                
+                document.getElementById('submit-answer').classList.remove('hidden');
+                document.getElementById('next-question').classList.add('hidden');
+                
+                generateQuestion();
+            }
+        }
+    </script>
+</body>
+</html>
